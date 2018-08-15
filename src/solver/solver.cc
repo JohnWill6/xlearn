@@ -452,6 +452,9 @@ void Solver::init_predict() {
   loss_ = create_loss();
   loss_->Initialize(score_, pool_, hyper_param_.norm);
   LOG(INFO) << "Initialize score function.";
+  // Init embedding function
+  embed_ = new Embed();
+  embed_->Initialize(score_, pool_, hyper_param_.norm);
 }
 
 /******************************************************************************
@@ -564,6 +567,15 @@ void Solver::start_prediction_work() {
 // Embedding
 void Solver::start_embedding_work() {
   print_action("Start to predict ...");
+  Predictor pdc;
+  pdc.Initialize(reader_[0], 
+                 model_, 
+                 loss_, 
+                 hyper_param_.output_file, 
+                 hyper_param_.sign, 
+                 hyper_param_.sigmoid);
+  // transform feature and write output
+  pdc.FeaTransform(embed_);
 }
 
 /******************************************************************************

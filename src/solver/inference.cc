@@ -19,6 +19,7 @@ This file is the implementation of the Predictor class.
 */
 
 #include "src/solver/inference.h"
+#include "src/loss/embed.h"
 #include "src/base/timer.h"
 #include "src/base/format_print.h"
 
@@ -57,6 +58,22 @@ void Predictor::Predict() {
       StringPrintf("The test loss is: %.6f", 
         loss_->GetLoss())
     );
+  }
+}
+
+void Predictor::FeaTransform(Embed* embed) {
+  std::ofstream o_file(out_file_);
+  static std::vector<std::string> out;
+  DMatrix* matrix = nullptr;
+  reader_->Reset();
+  for (;;) {
+    index_t tmp = reader_->Samples(matrix);
+    if (tmp == 0) { break; }
+    if (tmp != out.size()) { out.resize(tmp); }
+    embed->FeaTransform(matrix, *model_, out);
+    for (index_t i = 0; i < out.size(); ++i) {
+      o_file << out[i] << "\n";
+    }
   }
 }
 

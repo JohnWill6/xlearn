@@ -38,6 +38,7 @@ struct HyperParam {
   /* Train or Predict.
   True for train, and false for predict. */
   bool is_train = true;
+  bool is_embedding = false;
   /* On-disk training for limited memory.
   True for on-disk training, and false for in-memory training. */
   bool on_disk = false;

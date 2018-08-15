@@ -28,6 +28,7 @@ This file defines the Predictor class.
 #include "src/data/model_parameters.h"
 #include "src/reader/reader.h"
 #include "src/loss/loss.h"
+#include "src/loss/embed.h"
 
 namespace xLearn {
 
@@ -62,6 +63,9 @@ class Predictor {
 
   // The core function
   void Predict();
+
+  // Embedding function
+  void FeaTransform(Embed* embed);
 
  protected:
   Reader* reader_;

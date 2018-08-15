@@ -33,6 +33,7 @@ of the xLearn.
 #include "src/score/score_function.h"
 #include "src/loss/loss.h"
 #include "src/loss/metric.h"
+#include "src/loss/embed.h"
 #include "src/solver/checker.h"
 #include "src/solver/trainer.h"
 #include "src/solver/inference.h"
@@ -103,6 +104,7 @@ class Solver {
   xLearn::Score* score_;
   /* cross-entropy or squared ? */
   xLearn::Loss* loss_;
+  xLearn::Embed* embed_;
   /* acc, prec, recall, mae, etc */
   xLearn::Metric* metric_;
   /* ThreadPool for multi-thread training */
@@ -127,6 +129,7 @@ class Solver {
   // Start function
   void start_train_work();
   void start_prediction_work();
+  void start_embedding_work();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Solver);

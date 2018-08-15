@@ -167,7 +167,6 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
     value = (iter->second).first/(iter->second).second;
     emb_ins << delim << iter->first << ":" << value;
   }
-  emb_ins << "\n";
   return emb_ins.str();
 }
 
