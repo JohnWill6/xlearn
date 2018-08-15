@@ -40,6 +40,15 @@ real_t LinearScore::CalcScore(const SparseRow* row,
   return score;
 }
 
+std::string LinearScore::FeaTransform(
+    const SparseRow* row,
+    Model& model,
+    real_t label, 
+    real_t norm) {
+  // do nothing
+  return "";
+}
+
 // Calculate gradient and update current model
 void LinearScore::CalcGrad(const SparseRow* row,
                            Model& model,

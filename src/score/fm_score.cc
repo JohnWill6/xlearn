@@ -90,6 +90,14 @@ real_t FMScore::CalcScore(const SparseRow* row,
   return t_all;
 }
 
+std::string FMScore::FeaTransform(const SparseRow* row,
+                                  Model& model,
+                                  real_t label, 
+                                  real_t norm) {
+  // do nothing
+  return "";
+}
+
 // Calculate gradient and update current model parameters.
 // Using SSE to accelerate vector operation.
 void FMScore::CalcGrad(const SparseRow* row,

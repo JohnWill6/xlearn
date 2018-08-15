@@ -62,7 +62,14 @@ class Solver {
 
   // Ser train or predict
   void SetTrain() { hyper_param_.is_train = true; }
-  void SetPredict() { hyper_param_.is_train = false; }
+  void SetPredict() { 
+    hyper_param_.is_train = false; 
+    hyper_param_.is_embedding = false;
+  }
+  void SetEmbedding() {
+    hyper_param_.is_train = false;
+    hyper_param_.is_embedding = true;
+  }
 
   // Initialize the xLearn environment, including checking
   // and parsing the commad line arguments, reading problem

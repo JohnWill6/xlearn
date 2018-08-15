@@ -44,6 +44,11 @@ class FMScore : public Score {
                    Model& model,
                    real_t norm = 1.0);
 
+  std::string FeaTransform(const SparseRow* row, 
+                           Model& model, 
+                           real_t label, 
+                           real_t norm = 1.0);
+
   // Calculate gradient and update current
   // model parameters.
   void CalcGrad(const SparseRow* row,

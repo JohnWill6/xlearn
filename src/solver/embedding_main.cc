@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   timer.tic();
 
   xLearn::Solver solver;
-  solver.SetPredict();
+  solver.SetEmbedding();
   solver.Initialize(argc, argv);
   solver.StartWork();
   solver.Clear();

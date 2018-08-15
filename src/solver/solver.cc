@@ -127,6 +127,8 @@ void Solver::Initialize(int argc, char* argv[]) {
   if (hyper_param_.is_train) {
     init_train();
   } else {
+    // init_embedding()
+    // 结构相同，暂时省略
     init_predict();
   }
 }
@@ -146,6 +148,8 @@ void Solver::Initialize(HyperParam& hyper_param) {
   if (hyper_param_.is_train) {
     init_train();
   } else {
+    // init_embedding
+    // 结构相同，暂时省略
     init_predict();
   }
 }
@@ -460,6 +464,10 @@ void Solver::StartWork() {
     LOG(INFO) << "Start training work.";
     start_train_work();
   } else {
+    if (hyper_param_.is_embedding) {
+      LOG(INFO) << "Start embedding work.";
+      start_embedding_work();
+    }
     LOG(INFO) << "Start inference work.";
     start_prediction_work();
   }
@@ -551,6 +559,11 @@ void Solver::start_prediction_work() {
                  hyper_param_.sigmoid);
   // Predict and write output
   pdc.Predict();
+}
+
+// Embedding
+void Solver::start_embedding_work() {
+  print_action("Start to predict ...");
 }
 
 /******************************************************************************
