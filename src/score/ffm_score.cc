@@ -166,6 +166,7 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
     // 考虑multi特征
     value = (iter->second).first/(iter->second).second;
     emb_ins << delim << iter->first << ":" << value;
+    ++iter;
   }
   return emb_ins.str();
 }

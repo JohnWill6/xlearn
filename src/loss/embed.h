@@ -5,7 +5,6 @@
 #include <string>
 
 #include "src/base/common.h"
-#include "src/base/class_register.h"
 #include "src/base/math.h"
 #include "src/base/thread_pool.h"
 #include "src/data/model_parameters.h"

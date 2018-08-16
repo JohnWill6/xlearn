@@ -470,9 +470,10 @@ void Solver::StartWork() {
     if (hyper_param_.is_embedding) {
       LOG(INFO) << "Start embedding work.";
       start_embedding_work();
+    } else {
+      LOG(INFO) << "Start inference work.";
+      start_prediction_work();
     }
-    LOG(INFO) << "Start inference work.";
-    start_prediction_work();
   }
 }
 

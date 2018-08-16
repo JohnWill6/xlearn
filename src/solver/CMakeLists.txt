@@ -15,6 +15,9 @@ target_link_libraries(xlearn_train ${LIBS})
 add_executable(xlearn_predict predict_main.cc)
 target_link_libraries(xlearn_predict ${LIBS})
 
+add_executable(xlearn_embedding embedding_main.cc)
+target_link_libraries(xlearn_embedding ${LIBS})
+
 # Install library and header files
 install(TARGETS solver DESTINATION lib/solver)
 FILE(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h")

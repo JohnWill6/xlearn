@@ -14,7 +14,7 @@ add_library(xlearn_api_shared SHARED c_api.cc c_api_error.cc
 ../base/levenshtein_distance.cc ../base/timer.cc 
 ../data/model_parameters.cc 
 ../loss/loss.cc ../loss/squared_loss.cc ../loss/cross_entropy_loss.cc 
-../loss/metric.cc 
+../loss/metric.cc ../loss/embed.cc 
 ../reader/parser.cc ../reader/file_splitor.cc ../reader/reader.cc 
 ../score/score_function.cc ../score/linear_score.cc ../score/fm_score.cc 
 ../score/ffm_score.cc 
