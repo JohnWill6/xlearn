@@ -55,6 +55,7 @@ real_t FFMScore::CalcScore(const SparseRow* row,
   int align = kAlign * aux_size;
   w = model.GetParameter_v();
   __m128 XMMt = _mm_setzero_ps();
+  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -65,6 +66,8 @@ real_t FFMScore::CalcScore(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
+      key_str = std::to_string(f1) + "#" + std::to_string(f2);
+      if (!model.is_legal(key_str)) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -222,6 +225,7 @@ void FFMScore::calc_grad_sgd(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMlr = _mm_set1_ps(learning_rate_);
   __m128 XMMlamb = _mm_set1_ps(regu_lambda_);
+  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -232,6 +236,8 @@ void FFMScore::calc_grad_sgd(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
+      key_str = std::to_string(f1) + ":" + std::to_string(f2);
+      if(!model.is_legal(key_str)) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -292,6 +298,7 @@ void FFMScore::calc_grad_adagrad(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMlr = _mm_set1_ps(learning_rate_);
   __m128 XMMlamb = _mm_set1_ps(regu_lambda_);
+  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -302,6 +309,8 @@ void FFMScore::calc_grad_adagrad(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
+      key_str = std::to_string(f1) + ":" + std::to_string(f2);
+      if (!model.is_legal(key_str)) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -393,6 +402,7 @@ void FFMScore::calc_grad_ftrl(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMalpha = _mm_set1_ps(alpha_);
   __m128 XMML2 = _mm_set1_ps(lambda_2_);
+  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -403,6 +413,8 @@ void FFMScore::calc_grad_ftrl(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
+      key_str = std::to_string(f1) + ":" + std::to_string(f2);
+      if (!model.is_legal(key_str)) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);

@@ -73,6 +73,7 @@ void Model::Initialize(const std::string& score_func,
     LOG(FATAL) << "Unknow score function: " << score_func;
   }
   this->initial(true);
+  this->read_interaction();
 }
 
 // To get the best performance for SSE, we need to
@@ -109,6 +110,22 @@ void Model::initial(bool set_val) {
   if (set_val) {
     set_value();
   }
+}
+
+// read interaction control file
+void Model::read_interaction() {
+  std::ifstream in("fea.init");
+  index_t i = 0;
+  std::string key;
+  while (in >> i >> key) {
+    fea_map_[key] = i;
+  }
+}
+
+bool Model::is_legal(std::string key) {
+  if (fea_map_.find(key) != fea_map_.end())
+    return true;
+  return false;
 }
 
 // Set value for model

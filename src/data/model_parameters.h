@@ -115,6 +115,9 @@ class Model {
   // Shrink back for getting the best model.
   void Shrink();
 
+  // whether the interation is legal.
+  bool is_legal(std::string key);
+
   // Get the size of auxiliary cache size
   inline real_t GetAuxiliarySize() { return aux_size_; }
 
@@ -206,10 +209,14 @@ class Model {
   real_t* param_best_b_ = nullptr;
   /* Used for init model parameters */
   real_t scale_;
+  // 控制交叉项
+  std::unordered_map<std::string, index_t> fea_map_;
 
   // Initialize the value of model parameters.
   // and gradient cache
   void initial(bool set_value = false);
+
+  void read_interaction();
 
   // Reset the value of current model parameters.
   void set_value();
