@@ -69,11 +69,11 @@ void Model::Initialize(const std::string& score_func,
   } else if (score_func == "ffm") {
     // ffm: feature * K * field
     param_num_v_ = num_feature * get_aligned_k() * num_field * aux_size_;
+    this->read_interaction();
   } else {
     LOG(FATAL) << "Unknow score function: " << score_func;
   }
   this->initial(true);
-  this->read_interaction();
 }
 
 // To get the best performance for SSE, we need to
@@ -114,18 +114,23 @@ void Model::initial(bool set_val) {
 
 // read interaction control file
 void Model::read_interaction() {
+  // init 
+  for (index_t i = 0; i < num_field_; ++i) 
+    fea_map_.push_back(
+        std::vector<index_t> (num_field_, -1));
   std::ifstream in("fea.init");
-  index_t i = 0;
-  std::string key;
-  while (in >> i >> key) {
-    fea_map_[key] = i;
+  index_t i = 0, f1 = 0, f2 = 0;
+  while (in >> i >> f1 >> f2) {
+    fea_map_[f1][f2] = i;
+    std::cout << i << " " << f1 << " " << f2 << std::endl;
   }
 }
 
-bool Model::is_legal(std::string key) {
-  if (fea_map_.find(key) != fea_map_.end())
-    return true;
-  return false;
+int Model::interaction_index(index_t f1, index_t f2) {
+  if (f1 > f2)
+    return fea_map_[f1][f2];
+  else 
+    return fea_map_[f2][f1];
 }
 
 // Set value for model
@@ -212,6 +217,7 @@ Model::Model(const std::string& filename) {
     );
     exit(0);
   }
+  this->read_interaction();
 }
 
 // Serialize current model to a disk file

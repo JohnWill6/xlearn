@@ -55,7 +55,6 @@ real_t FFMScore::CalcScore(const SparseRow* row,
   int align = kAlign * aux_size;
   w = model.GetParameter_v();
   __m128 XMMt = _mm_setzero_ps();
-  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -66,8 +65,7 @@ real_t FFMScore::CalcScore(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
-      key_str = std::to_string(f1) + "#" + std::to_string(f2);
-      if (!model.is_legal(key_str)) continue;
+      if (model.interaction_index(f1, f2) < 0) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -99,20 +97,19 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
   real_t sqrt_norm = sqrt(norm);
   real_t *w = model.GetParameter_w();
   index_t aux_size = model.GetAuxiliarySize();
-  std::unordered_map<std::string, 
-    std::pair<real_t, size_t>> fea_map;
-  std::string key_str;
+  std::map<index_t, 
+    std::pair<real_t, index_t>> fea_map;
   for (SparseRow::const_iterator iter = row->begin();
        iter != row->end(); ++iter) {
     value = (iter->feat_val * 
              w[iter->feat_id*aux_size] * 
             sqrt_norm);
-    key_str = std::to_string(iter->field_id);
-    if (fea_map.find(key_str) != fea_map.end()) {
-      fea_map[key_str].first += value;
-      fea_map[key_str].second += 1;
+    index_t key = iter->field_id;
+    if (fea_map.find(key) != fea_map.end()) {
+      fea_map[key].first += value;
+      fea_map[key].second += 1;
     } else {
-      fea_map[key_str] = std::make_pair(value, 1);
+      fea_map[key] = std::make_pair(value, 1);
     }
   }
   // not need bias
@@ -133,6 +130,9 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
+      int fii = model.interaction_index(f1, f2); 
+      if (fii < 0) continue;
+      index_t key = fii + model.GetNumField();
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -149,13 +149,11 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
         XMMt = _mm_hadd_ps(XMMt, XMMt);
         _mm_store_ss(&value, XMMt);
 
-        key_str = std::to_string(f1) + "_" + 
-                  std::to_string(f2);
-        if (fea_map.find(key_str) != fea_map.end()) {
-          fea_map[key_str].first += value;
-          fea_map[key_str].second += 1;
+        if (fea_map.find(key) != fea_map.end()) {
+          fea_map[key].first += value;
+          fea_map[key].second += 1;
         } else {
-          fea_map[key_str] = std::make_pair(value, 1);
+          fea_map[key] = std::make_pair(value, 1);
         }
       }
     }
@@ -163,8 +161,8 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
   std::stringstream emb_ins;
   std::string delim = " ";
   emb_ins << label;
-  std::unordered_map<std::string, 
-    std::pair<real_t, size_t>>::iterator iter = fea_map.begin();
+  std::map<index_t, 
+    std::pair<real_t, index_t>>::iterator iter = fea_map.begin();
   while (iter != fea_map.end()) {
     // 考虑multi特征
     value = (iter->second).first/(iter->second).second;
@@ -225,7 +223,6 @@ void FFMScore::calc_grad_sgd(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMlr = _mm_set1_ps(learning_rate_);
   __m128 XMMlamb = _mm_set1_ps(regu_lambda_);
-  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -236,8 +233,7 @@ void FFMScore::calc_grad_sgd(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
-      key_str = std::to_string(f1) + ":" + std::to_string(f2);
-      if(!model.is_legal(key_str)) continue;
+      if(model.interaction_index(f1, f2) < 0) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -260,7 +256,6 @@ void FFMScore::calc_grad_sgd(const SparseRow* row,
       }
     }
   }
-
 }
 
 // Calculate gradient and update current model using adagrad
@@ -298,7 +293,6 @@ void FFMScore::calc_grad_adagrad(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMlr = _mm_set1_ps(learning_rate_);
   __m128 XMMlamb = _mm_set1_ps(regu_lambda_);
-  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -309,8 +303,7 @@ void FFMScore::calc_grad_adagrad(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
-      key_str = std::to_string(f1) + ":" + std::to_string(f2);
-      if (!model.is_legal(key_str)) continue;
+      if (model.interaction_index(f1, f2) < 0) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);
@@ -402,7 +395,6 @@ void FFMScore::calc_grad_ftrl(const SparseRow* row,
   __m128 XMMpg = _mm_set1_ps(pg);
   __m128 XMMalpha = _mm_set1_ps(alpha_);
   __m128 XMML2 = _mm_set1_ps(lambda_2_);
-  std::string key_str;
   for (SparseRow::const_iterator iter_i = row->begin();
        iter_i != row->end(); ++iter_i) {
     index_t j1 = iter_i->feat_id;
@@ -413,8 +405,7 @@ void FFMScore::calc_grad_ftrl(const SparseRow* row,
       index_t j2 = iter_j->feat_id;
       index_t f2 = iter_j->field_id;
       real_t v2 = iter_j->feat_val;
-      key_str = std::to_string(f1) + ":" + std::to_string(f2);
-      if (!model.is_legal(key_str)) continue;
+      if (model.interaction_index(f1, f2) < 0) continue;
       real_t* w1_base = w + j1*align1 + f2*align0;
       real_t* w2_base = w + j2*align1 + f1*align0;
       __m128 XMMv = _mm_set1_ps(v1*v2*norm);

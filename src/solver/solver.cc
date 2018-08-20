@@ -567,7 +567,7 @@ void Solver::start_prediction_work() {
 
 // Embedding
 void Solver::start_embedding_work() {
-  print_action("Start to predict ...");
+  print_action("Start to transform feature ...");
   Predictor pdc;
   pdc.Initialize(reader_[0], 
                  model_, 
