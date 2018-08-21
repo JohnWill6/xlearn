@@ -117,7 +117,7 @@ void Model::read_interaction() {
   // init 
   for (index_t i = 0; i < num_field_; ++i) 
     fea_map_.push_back(
-        std::vector<index_t> (num_field_, -1));
+        std::vector<int> (num_field_, -1));
   std::ifstream in("fea.init");
   index_t i = 0, f1 = 0, f2 = 0;
   while (in >> i >> f1 >> f2) {
@@ -127,7 +127,7 @@ void Model::read_interaction() {
 }
 
 int Model::interaction_index(index_t f1, index_t f2) {
-  if (f1 > f2)
+  if (f1 < f2)
     return fea_map_[f1][f2];
   else 
     return fea_map_[f2][f1];
