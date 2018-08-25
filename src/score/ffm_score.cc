@@ -86,6 +86,7 @@ real_t FFMScore::CalcScore(const SparseRow* row,
   return sum_v + sum_w;
 }
 
+// no normalization
 std::string FFMScore::FeaTransform(const SparseRow* row,
                                    Model& model,
                                    real_t label, 
@@ -101,9 +102,7 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
     std::pair<real_t, index_t>> fea_map;
   for (SparseRow::const_iterator iter = row->begin();
        iter != row->end(); ++iter) {
-    value = (iter->feat_val * 
-             w[iter->feat_id*aux_size] * 
-            sqrt_norm);
+    value = w[iter->feat_id*aux_size];
     index_t key = iter->field_id;
     if (fea_map.find(key) != fea_map.end()) {
       fea_map[key].first += value;
@@ -145,16 +144,17 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
         XMMt = _mm_add_ps(XMMt,
                _mm_mul_ps(
                _mm_mul_ps(XMMw1, XMMw2), XMMv));
-        XMMt = _mm_hadd_ps(XMMt, XMMt);
-        XMMt = _mm_hadd_ps(XMMt, XMMt);
-        _mm_store_ss(&value, XMMt);
+      }
 
-        if (fea_map.find(key) != fea_map.end()) {
-          fea_map[key].first += value;
-          fea_map[key].second += 1;
-        } else {
-          fea_map[key] = std::make_pair(value, 1);
-        }
+      XMMt = _mm_hadd_ps(XMMt, XMMt);
+      XMMt = _mm_hadd_ps(XMMt, XMMt);
+      _mm_store_ss(&value, XMMt);
+
+      if (fea_map.find(key) != fea_map.end()) {
+        fea_map[key].first += value;
+        fea_map[key].second += 1;
+      } else {
+        fea_map[key] = std::make_pair(value, 1);
       }
     }
   }
@@ -165,7 +165,8 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
     std::pair<real_t, index_t>>::iterator iter = fea_map.begin();
   while (iter != fea_map.end()) {
     // 考虑multi特征
-    value = (iter->second).first/(iter->second).second;
+    // value = (iter->second).first/(iter->second).second;
+    value = (iter->second).first;
     emb_ins << delim << iter->first << ":" << value;
     ++iter;
   }
