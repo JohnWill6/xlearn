@@ -210,7 +210,7 @@ class Model {
   /* Used for init model parameters */
   real_t scale_;
   // 控制交叉项
-  std::vector<std::vector<index_t>> fea_map_;
+  std::vector<std::vector<int>> fea_map_;
 
   // Initialize the value of model parameters.
   // and gradient cache

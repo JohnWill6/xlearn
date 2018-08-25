@@ -95,7 +95,7 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
    *  linear term and bias term                            *
    *********************************************************/
   real_t value = 0;
-  real_t sqrt_norm = sqrt(norm);
+  //real_t sqrt_norm = sqrt(norm);
   real_t *w = model.GetParameter_w();
   index_t aux_size = model.GetAuxiliarySize();
   std::map<index_t, 
@@ -167,7 +167,8 @@ std::string FFMScore::FeaTransform(const SparseRow* row,
     // 考虑multi特征
     // value = (iter->second).first/(iter->second).second;
     value = (iter->second).first;
-    emb_ins << delim << iter->first << ":" << value;
+    if (value > 1e-5)
+      emb_ins << delim << iter->first << ":" << value;
     ++iter;
   }
   return emb_ins.str();

@@ -17,28 +17,30 @@ def load_model(path):
                     si.append(i-6)
     return si
 
-def load_fmap(path):
+def load_fmap(path, num_fields):
     fmap = {i:str(i) for i in range(1, num_fields+1)}
     with open(path, "r") as fin:
         for line in fin:
             a, b, c = line.strip().split(" ")
             fmap[int(a) + num_fields + 1] = str(b) + "#" + str(c)
+    return fmap
 
 def main():
-    num_fields = int(sys.argv[1]) + 1
+    num_fields = int(sys.argv[1])
     model_path = sys.argv[2]
     fi_path    = sys.argv[3]
     si = load_model(model_path)
-    fmap = load_fmap(fi_path)
+    fmap = load_fmap(fi_path, num_fields)
+    print fmap
     
     single = []   # 单特征
     combine = []  # 组合特征
     for i in si:
         if i in fmap:
-            if "_" in fmap[i]:
+            if "#" in fmap[i]:
                 combine.append(fmap[i])
             else:
-                single.append(fmap[i])
+                single.append(int(fmap[i]))
 
     # 过滤掉的单特征
     filter = list(set(range(1, num_fields+1)) \
